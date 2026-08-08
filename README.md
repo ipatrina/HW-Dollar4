@@ -22,7 +22,7 @@
 
 # 系统要求
 
-- 适用于Windows 10及以上64位操作系统。
+- Windows 10 及以上版本 64 位操作系统。
 
 - Microsoft .NET Framework 4.7.2 及以上版本。
 
