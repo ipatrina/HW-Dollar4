@@ -810,7 +810,7 @@ Public Class MainUI
                 If _loc_6 + 256 > KSFv2.Length Then Exit For
                 Dim _loc_7 As Integer = GetBigEndian32(KSFv2, _loc_6 + 0)
                 Dim _loc_8 As Integer = GetBigEndian32(KSFv2, _loc_6 + 4)
-                If DomainID = _loc_7 And KeyID = _loc_8 Then
+                If DomainID = _loc_7 AndAlso KeyID = _loc_8 Then
                     Dim MasterKey_EncryptedLength As Integer = GetBigEndian32(KSFv2, _loc_6 + 88)
                     Dim MasterKey_Length As Integer = GetBigEndian32(KSFv2, _loc_6 + 92)
                     Dim MasterKey_EncryptionKey(31) As Byte
@@ -839,88 +839,95 @@ Public Class MainUI
         End Try
     End Sub
 
-    Private Sub LoadConfig(Input As String)
+    Private Sub LoadConfig(param1 As String)
         Try
-            If My.Computer.FileSystem.FileExists(Input) Then
+            If My.Computer.FileSystem.FileExists(param1) Then
                 TxtMain.Clear()
                 RadV3.Checked = True
                 ChkPolicy.Checked = False
-                If Path.GetFileName(Input) = "kmc_store_A" Or Path.GetFileName(Input) = "kmc_store_B" Then
-                    D4KeyStoreLast = Path.GetDirectoryName(Input)
-                    TxtMain.Text = KMCv2_GetAllMasterKey(Input)
+                If Path.GetFileName(param1) = "kmc_store_A" OrElse Path.GetFileName(param1) = "kmc_store_B" Then
+                    D4KeyStoreLast = Path.GetDirectoryName(param1)
+                    TxtMain.Text = KMCv2_GetAllMasterKey(param1)
                     Exit Sub
                 End If
-                Dim InputBuffer As Byte() = My.Computer.FileSystem.ReadAllBytes(Input)
-                If InputBuffer(0) = &H67 And InputBuffer(1) = &H66 And InputBuffer(2) = &H63 And InputBuffer(3) = &H71 Then
+                Dim InputBuffer As Byte() = My.Computer.FileSystem.ReadAllBytes(param1)
+                If InputBuffer(0) = &H67 AndAlso InputBuffer(1) = &H66 AndAlso InputBuffer(2) = &H63 AndAlso InputBuffer(3) = &H71 Then
                     Dim _loc_31 As Byte() = New Byte(InputBuffer.Length - 33) {}
                     Array.Copy(InputBuffer, 32, _loc_31, 0, InputBuffer.Length - 32)
                     Dim _loc_32 As Byte() = New Byte(3) {}
                     Array.Copy(InputBuffer, 4, _loc_32, 0, 4)
                     Dim Ctce8PayloadCRC As String = BytesToHex(_loc_32)
-                    If Not BytesToHex(BitConverter.GetBytes(CRC32(_loc_31))) = Ctce8PayloadCRC Or Not BitConverter.ToInt32(InputBuffer, 8) = _loc_31.Length Then
+                    If Not BytesToHex(BitConverter.GetBytes(CRC32(_loc_31))) = Ctce8PayloadCRC OrElse Not BitConverter.ToInt32(InputBuffer, 8) = _loc_31.Length Then
                         TxtMain.Text = "[ 提示 ] CFG配置文件CRC检查失败！"
                         Exit Sub
                     End If
                     InputBuffer = UnGZip(_loc_31)
-                End If
-                If InputBuffer(0) = &H1B And InputBuffer(1) = &H5C And InputBuffer(2) = &H9F And InputBuffer(3) = &H3A And InputBuffer(4) = &H12 And InputBuffer(5) = &H3 And InputBuffer(6) = &H20 And InputBuffer(7) = &H20 Then
-                    RadV5.Checked = True
-                ElseIf InputBuffer(3) = &H1B And InputBuffer(2) = &H5C And InputBuffer(1) = &H9F And InputBuffer(0) = &H3A And InputBuffer(7) = &H12 And InputBuffer(6) = &H3 And InputBuffer(5) = &H20 And InputBuffer(4) = &H20 Then
-                    RadV6.Checked = True
-                ElseIf InputBuffer(0) = &H20 And InputBuffer(1) = &H22 And InputBuffer(2) = &H7 And InputBuffer(3) = &H9 Then
-                    HW_D4SetPassword(Path.GetDirectoryName(Input))
-                    Dim D4DecryptBuffer As Byte() = HW_D4Decrypt(InputBuffer)
-                    If D4DecryptBuffer.Length > 0 Then
-                        RenameConfig(Input)
-                        My.Computer.FileSystem.WriteAllBytes(Input, D4DecryptBuffer, False)
-                        TxtMain.Text = "[ 提示 ] 文件已保存！" & vbCrLf & Input
-                        RadD4.Checked = True
-                    Else
-                        TxtMain.Text = "[ 提示 ] 文件打开失败！"
-                    End If
-                    HW_D4Reset()
-                    Exit Sub
-                ElseIf InputBuffer(0) = &H7 And InputBuffer(1) = &H12 And InputBuffer(2) = &H21 And InputBuffer(3) = &H20 Then
+                ElseIf InputBuffer(0) = &H7 AndAlso InputBuffer(1) = &H12 AndAlso InputBuffer(2) = &H21 AndAlso InputBuffer(3) = &H20 Then
                     Dim _loc_2 As Integer = GetLittleEndian32(InputBuffer, 52)
-                    If _loc_2 = 328 And GetLittleEndian32(InputBuffer, 328) = 3 Then
+                    If _loc_2 = 328 Then
                         Dim _loc_10 As Integer = GetLittleEndian32(InputBuffer, 56)
                         Dim _loc_11(_loc_10 - 1) As Byte
                         Array.Copy(InputBuffer, 328, _loc_11, 0, _loc_10)
                         Dim _loc_12(39) As Byte
                         Array.Copy(InputBuffer, 64, _loc_12, 0, _loc_12.Length)
                         If GetLittleEndian32(InputBuffer, 60) = 1 AndAlso GetLittleEndian32(InputBuffer, 320) = CRC32(_loc_11) AndAlso GetLittleEndian32(InputBuffer, 324) = CRC32(_loc_12) Then
-                            Dim _loc_3 As Integer = GetLittleEndian32(InputBuffer, 4)
-                            PolicyPassword = ""
-                            Policy.ShowDialog()
-                            If PolicyPassword.Length = 0 Then
-                                D4KeyStore = New Byte(3) {}
-                            Else
-                                If _loc_3 = 1 Then
-                                    D4Password = Encoding.UTF8.GetBytes(PolicyPassword)
-                                    D4KeyStore = New Byte(3) {}
-                                ElseIf _loc_3 = 2 Then
-                                    Dim _loc_4 As Integer = Array.IndexOf(InputBuffer, CByte(0), 12) - 12
-                                    Dim _loc_5(_loc_4 - 1) As Byte
-                                    Array.Copy(InputBuffer, 12, _loc_5, 0, _loc_4)
-                                    D4Password = Encoding.UTF8.GetBytes(BytesToHex(PKCS5_PBKDF2_HMAC(Encoding.UTF8.GetBytes(PolicyPassword), _loc_5, 10000, 16)).ToLower())
+                            If GetLittleEndian32(InputBuffer, 328) = 3 Then
+                                Dim _loc_3 As Integer = GetLittleEndian32(InputBuffer, 4)
+                                PolicyPassword = ""
+                                Policy.ShowDialog()
+                                If PolicyPassword.Length = 0 Then
                                     D4KeyStore = New Byte(3) {}
                                 Else
-                                    D4KeyStore = New Byte(3) {}
+                                    If _loc_3 = 1 Then
+                                        D4Password = Encoding.UTF8.GetBytes(PolicyPassword)
+                                        D4KeyStore = New Byte(3) {}
+                                    ElseIf _loc_3 = 2 Then
+                                        Dim _loc_4 As Integer = Array.IndexOf(InputBuffer, CByte(0), 12) - 12
+                                        Dim _loc_5(_loc_4 - 1) As Byte
+                                        Array.Copy(InputBuffer, 12, _loc_5, 0, _loc_4)
+                                        D4Password = Encoding.UTF8.GetBytes(BytesToHex(PKCS5_PBKDF2_HMAC(Encoding.UTF8.GetBytes(PolicyPassword), _loc_5, 10000, 16)).ToLower())
+                                        D4KeyStore = New Byte(3) {}
+                                    Else
+                                        D4KeyStore = New Byte(3) {}
+                                    End If
                                 End If
+                                TxtMain.Text = HW_D4DecryptXML(_loc_11)
+                                RadD4.Checked = True
+                                ChkPolicy.Checked = True
+                                PolicyPassword = ""
+                                HW_D4Reset()
+                                Exit Sub
+                            Else
+                                ChkPolicy.Checked = True
+                                InputBuffer = _loc_11
                             End If
-                            TxtMain.Text = HW_D4DecryptXML(_loc_11)
-                            RadD4.Checked = True
-                            ChkPolicy.Checked = True
-                            PolicyPassword = ""
-                            HW_D4Reset()
                         Else
                             TxtMain.Text = "[ 提示 ] 下载配置文件CRC检查失败！"
+                            Exit Sub
                         End If
                     Else
                         TxtMain.Text = "[ 提示 ] 文件打开失败！"
+                        Exit Sub
                     End If
+                End If
+                If InputBuffer(0) = &H1B AndAlso InputBuffer(1) = &H5C AndAlso InputBuffer(2) = &H9F AndAlso InputBuffer(3) = &H3A AndAlso InputBuffer(4) = &H12 AndAlso InputBuffer(5) = &H3 AndAlso InputBuffer(6) = &H20 AndAlso InputBuffer(7) = &H20 Then
+                    RadV5.Checked = True
+                ElseIf InputBuffer(3) = &H1B AndAlso InputBuffer(2) = &H5C AndAlso InputBuffer(1) = &H9F AndAlso InputBuffer(0) = &H3A AndAlso InputBuffer(7) = &H12 AndAlso InputBuffer(6) = &H3 AndAlso InputBuffer(5) = &H20 AndAlso InputBuffer(4) = &H20 Then
+                    RadV6.Checked = True
+                ElseIf InputBuffer(0) = &H20 AndAlso InputBuffer(1) = &H22 AndAlso InputBuffer(2) = &H7 AndAlso InputBuffer(3) = &H9 Then
+                    HW_D4SetPassword(Path.GetDirectoryName(param1))
+                    Dim D4DecryptBuffer As Byte() = HW_D4Decrypt(InputBuffer)
+                    If D4DecryptBuffer.Length > 0 Then
+                        RenameConfig(param1)
+                        My.Computer.FileSystem.WriteAllBytes(param1, D4DecryptBuffer, False)
+                        TxtMain.Text = "[ 提示 ] 文件已保存！" & vbCrLf & param1
+                        RadD4.Checked = True
+                    Else
+                        TxtMain.Text = "[ 提示 ] 文件打开失败！"
+                    End If
+                    HW_D4Reset()
                     Exit Sub
-                ElseIf InputBuffer(0) = &H3 And InputBuffer(1) = &H0 And InputBuffer(2) = &H0 And InputBuffer(3) = &H0 Then
+                ElseIf InputBuffer(0) = &H3 AndAlso InputBuffer(1) = &H0 AndAlso InputBuffer(2) = &H0 AndAlso InputBuffer(3) = &H0 Then
                     Dim HeaderLength As Integer = 8
                     Dim _loc_9 As Byte() = New Byte(3) {}
                     Array.Copy(InputBuffer, 4, _loc_9, 0, 4)
@@ -931,12 +938,12 @@ Public Class MainUI
                         TxtMain.Text = "[ 提示 ] XML配置文件CRC检查失败！"
                         Exit Sub
                     End If
-                    HW_D4SetPassword(Path.GetDirectoryName(Input))
+                    HW_D4SetPassword(Path.GetDirectoryName(param1))
                     TxtMain.Text = HW_D4DecryptXML(InputBuffer)
                     RadD4.Checked = True
                     HW_D4Reset()
                     Exit Sub
-                ElseIf (InputBuffer(0) = &H1 Or InputBuffer(0) = &H2) And InputBuffer(1) = &H0 And InputBuffer(2) = &H0 And InputBuffer(3) = &H0 Then
+                ElseIf (InputBuffer(0) = &H1 OrElse InputBuffer(0) = &H2) AndAlso InputBuffer(1) = &H0 AndAlso InputBuffer(2) = &H0 AndAlso InputBuffer(3) = &H0 Then
                     Dim _loc_1 As Byte() = New Byte(3) {}
                     Array.Copy(InputBuffer, 4, _loc_1, 0, 4)
                     Dim PayloadCRC As String = BytesToHex(_loc_1)
@@ -960,7 +967,7 @@ Public Class MainUI
                     End If
 
                     Dim DecryptBuffer As Byte() = AesCrypt2(Payload, 1, Encoding.UTF8.GetBytes(DecryptKey))
-                    If DecryptBuffer(0) = &H1F And DecryptBuffer(1) = &H8B Then
+                    If DecryptBuffer(0) = &H1F AndAlso DecryptBuffer(1) = &H8B Then
                         Dim UnzipBuffer As Byte() = UnGZip(DecryptBuffer)
                         TxtMain.Text = Encoding.UTF8.GetString(UnzipBuffer)
                     ElseIf DecryptBuffer.Length > 0 Then
@@ -971,14 +978,14 @@ Public Class MainUI
                     Exit Sub
                 End If
 
-                If BoardInfoVersion = 5 Or BoardInfoVersion = 6 Then
+                If BoardInfoVersion = 5 OrElse BoardInfoVersion = 6 Then
                     Dim DataBuffer As Byte() = New Byte(InputBuffer.Length - 21) {}
                     Array.Copy(InputBuffer, 20, DataBuffer, 0, InputBuffer.Length - 20)
                     InputBuffer = DataBuffer
                 End If
                 TxtMain.Text = Encoding.UTF8.GetString(InputBuffer)
-                If BoardInfoVersion = 5 Or BoardInfoVersion = 6 Then
-                    ParseText(Path.GetDirectoryName(Input))
+                If BoardInfoVersion = 5 OrElse BoardInfoVersion = 6 Then
+                    ParseText(Path.GetDirectoryName(param1))
                 End If
             End If
         Catch ex As Exception
