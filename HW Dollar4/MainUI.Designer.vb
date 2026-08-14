@@ -37,6 +37,7 @@ Partial Class MainUI
         Me.RadD4 = New System.Windows.Forms.RadioButton()
         Me.CboD2 = New System.Windows.Forms.ComboBox()
         Me.RadD1 = New System.Windows.Forms.RadioButton()
+        Me.ChkPolicy = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
         '
         'LblVersion
@@ -190,6 +191,18 @@ Partial Class MainUI
         Me.RadD1.Text = "$&1模式"
         Me.RadD1.UseVisualStyleBackColor = True
         '
+        'ChkPolicy
+        '
+        Me.ChkPolicy.AutoSize = True
+        Me.ChkPolicy.Font = New System.Drawing.Font("微软雅黑", 10.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
+        Me.ChkPolicy.ForeColor = System.Drawing.Color.LightCyan
+        Me.ChkPolicy.Location = New System.Drawing.Point(720, 527)
+        Me.ChkPolicy.Name = "ChkPolicy"
+        Me.ChkPolicy.Size = New System.Drawing.Size(56, 23)
+        Me.ChkPolicy.TabIndex = 991
+        Me.ChkPolicy.Text = "下载"
+        Me.ChkPolicy.UseVisualStyleBackColor = True
+        '
         'MainUI
         '
         Me.AllowDrop = True
@@ -197,6 +210,7 @@ Partial Class MainUI
         Me.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.BackColor = System.Drawing.Color.MediumVioletRed
         Me.ClientSize = New System.Drawing.Size(784, 561)
+        Me.Controls.Add(Me.ChkPolicy)
         Me.Controls.Add(Me.RadD1)
         Me.Controls.Add(Me.CboD2)
         Me.Controls.Add(Me.RadD4)
@@ -235,4 +249,5 @@ Partial Class MainUI
     Friend WithEvents RadD4 As RadioButton
     Friend WithEvents CboD2 As ComboBox
     Friend WithEvents RadD1 As RadioButton
+    Friend WithEvents ChkPolicy As CheckBox
 End Class
