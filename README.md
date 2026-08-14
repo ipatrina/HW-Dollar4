@@ -2,7 +2,7 @@
 
 华为ONT配置文件实用工具
 
-![HW Patrina preview](https://i.ibb.co/jvSPrVbC/HW-Dollar4-4-20-0.jpg)
+![HW Patrina preview](https://i.ibb.co/8gB4KJnf/HW-Dollar4-4-41-0.png)
 
 
 # 软件功能
@@ -17,7 +17,7 @@
 
 - 支持使用默认AES密钥、$2动态密钥和$4方式解密华为光终端XML、CFG格式配置文件。
 
-- 支持加密和使用文本密钥解密下载配置文件。
+- 支持使用以上方式加密、解密下载配置文件。
 
 - 支持使用KSF(v2)文件自动搜索UnVisible(一机一密)密钥。
 
